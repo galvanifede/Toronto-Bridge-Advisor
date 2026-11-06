@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Toronto Bridge Expert Advisor - Guida Clinica & Odontotecnica</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @media print {
+      .no-print { display: none !important; }
+      .print-only { display: block !important; }
+      body { background: white !important; color: black !important; }
+      .card-print { border: 1px solid #ccc !important; box-shadow: none !important; color: #1e293b !important; }
+    }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-teal-500 selection:text-white">
+
+  <!-- Header -->
+  <header class="bg-slate-800/80 backdrop-blur border-b border-slate-700 sticky top-0 z-50 no-print">
+    <div class="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-teal-500 flex items-center justify-center text-slate-900 font-bold text-xl shadow-lg shadow-teal-500/20">
+          <i class="fa-solid fa-tooth"></i>
+        </div>
+        <div>
+          <h1 class="font-bold text-lg leading-tight text-white">Toronto Bridge Expert Advisor</h1>
+          <p class="text-xs text-slate-400">Guida Interattiva Clinico-Chirurgica e Odontotecnica</p>
+        </div>
+      </div>
+      <div class="flex items-center space-x-2">
+        <button id="btn-restart" class="px-3 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-semibold transition flex items-center gap-2">
+          <i class="fa-solid fa-rotate-left"></i> Ricomincia
+        </button>
+        <button id="btn-admin" class="px-3 py-1.5 rounded-lg bg-teal-500/10 hover:bg-teal-500/20 text-teal-400 border border-teal-500/30 text-xs font-semibold transition flex items-center gap-2">
+          <i class="fa-solid fa-sliders"></i> Personalizza Albero (JSON)
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Container Principale -->
+  <main class="flex-1 max-w-4xl w-full mx-auto p-4 md:p-6 flex flex-col justify-center">
+    
+    <!-- CONTENITORE QUIZ -->
+    <div id="quiz-container" class="space-y-6">
+      
+      <!-- Progress Bar & Breadcrumbs -->
+      <div class="bg-slate-800/50 p-4 rounded-2xl border border-slate-700/60 no-print">
+        <div class="flex justify-between items-center mb-2">
+          <span id="step-counter" class="text-xs uppercase font-bold tracking-wider text-teal-400">Passo 1</span>
+          <span id="history-badge" class="text-xs text-slate-400">Percorso Decisionale Strategico</span>
+        </div>
+        <div id="breadcrumbs" class="flex flex-wrap gap-1 text-xs text-slate-400"></div>
+      </div>
+
+      <!-- Scheda Domanda -->
+      <div class="bg-slate-800 border border-slate-700/80 rounded-2xl p-6 md:p-8 shadow-2xl relative overflow-hidden">
+        <div class="absolute -right-10 -bottom-10 opacity-5 pointer-events-none text-9xl text-teal-400">
+          <i class="fa-solid fa-notes-medical"></i>
+        </div>
+
+        <h2 id="question-title" class="text-xl md:text-2xl font-bold text-white mb-2 leading-snug"></h2>
+        <p id="question-desc" class="text-slate-400 text-sm mb-4 leading-relaxed"></p>
+
+        <!-- Box informativo speciale (es. Spiegazione Orizzontale/Verticale) -->
+        <div id="info-box" class="hidden mb-6 p-4 bg-slate-900/80 border border-teal-500/30 rounded-xl text-xs text-slate-300 space-y-2">
+          <!-- Iniettato via JS -->
+        </div>
+
+        <!-- Opzioni -->
+        <div id="options-container" class="space-y-3"></div>
+
+        <!-- Bottone Indietro -->
+        <div class="mt-8 pt-4 border-t border-slate-700/60 flex justify-between items-center no-print">
+          <button id="btn-back" class="text-xs font-medium text-slate-400 hover:text-white transition flex items-center gap-1.5 hidden">
+            <i class="fa-solid fa-arrow-left"></i> Passo Precedente
+          </button>
+          <span class="text-xs text-slate-500 italic">Seleziona un'opzione per proseguire</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONTENITORE RISULTATO FINALE -->
+    <div id="result-container" class="hidden space-y-6">
+      <div class="bg-slate-800 border border-slate-700/80 rounded-2xl p-6 md:p-8 shadow-2xl card-print">
+        
+        <!-- Header Risultato -->
+        <div class="flex items-start justify-between border-b border-slate-700 pb-6 mb-6">
+          <div>
+            <span class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-teal-500/10 text-teal-400 border border-teal-500/20">
+              Prescrizione Integrata Clinico-Protesica
+            </span>
+            <h2 id="result-title" class="text-2xl md:text-3xl font-extrabold text-white mt-2"></h2>
+            <p id="result-subtitle" class="text-teal-400 text-sm font-medium mt-1"></p>
+          </div>
+          <button onclick="window.print()" class="no-print bg-slate-700 hover:bg-slate-600 text-white p-3 rounded-xl transition shadow">
+            <i class="fa-solid fa-print"></i>
+          </button>
+        </div>
+
+        <!-- Sezione 1: Tecnica Chirurgica consigliata -->
+        <div class="mb-6 bg-slate-900/50 p-4 rounded-xl border border-slate-700/50">
+          <h3 class="text-teal-400 font-bold text-sm uppercase tracking-wider mb-2 flex items-center gap-2">
+            <i class="fa-solid fa-user-md text-teal-400"></i> Pianificazione Chirurgica (CBCT &amp; Strategia)
+          </h3>
+          <ul id="result-surgical" class="space-y-2 text-sm text-slate-300"></ul>
+        </div>
+
+        <!-- Sezione 2: Odontotecnica & Struttura -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          <div class="bg-slate-900/50 p-4 rounded-xl border border-slate-700/50">
+            <h3 class="text-sm font-bold text-slate-200 mb-2 flex items-center gap-2">
+              <i class="fa-solid fa-sitemap text-teal-400"></i> Tipologia di Struttura (Laboratorio)
+            </h3>
+            <p id="result-structure" class="text-sm text-slate-300 leading-relaxed"></p>
+          </div>
+
+          <div class="bg-slate-900/50 p-4 rounded-xl border border-slate-700/50">
+            <h3 class="text-sm font-bold text-slate-200 mb-2 flex items-center gap-2">
+              <i class="fa-solid fa-flask text-teal-400"></i> Materiali Consigliati
+            </h3>
+            <p id="result-materials" class="text-sm text-slate-300 leading-relaxed"></p>
+          </div>
+        </div>
+
+        <!-- Sezione 3: Attenzioni e Indicazioni Strategiche -->
+        <div class="bg-slate-900/50 p-4 rounded-xl border border-slate-700/50 mb-6">
+          <h3 class="text-sm font-bold text-slate-200 mb-2 flex items-center gap-2">
+            <i class="fa-solid fa-shield-halved text-teal-400"></i> Biomeccanica &amp; Raccomandazioni Tecniche
+          </h3>
+          <ul id="result-notes" class="list-disc list-inside text-sm text-slate-300 space-y-1"></ul>
+        </div>
+
+        <!-- Summary scelte dell'utente -->
+        <div class="border-t border-slate-700/60 pt-6">
+          <h4 class="text-xs font-bold uppercase text-slate-400 mb-3 tracking-wider">Riepilogo Scelte Clinico-Tecniche</h4>
+          <div id="result-summary" class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-400"></div>
+        </div>
+
+        <!-- Azioni finale -->
+        <div class="mt-8 flex gap-3 no-print">
+          <button id="btn-result-restart" class="flex-1 bg-teal-500 hover:bg-teal-400 text-slate-900 font-bold py-3 rounded-xl transition text-center shadow-lg shadow-teal-500/20">
+            Nuova Valutazione Caso
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <!-- MODALE EDITOR JSON -->
+  <div id="admin-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden no-print">
+    <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-3xl w-full max-h-[90vh] flex flex-col shadow-2xl">
+      <div class="p-4 border-b border-slate-700 flex justify-between items-center">
+        <h3 class="font-bold text-white text-lg flex items-center gap-2">
+          <i class="fa-solid fa-code text-teal-400"></i> Editor Albero Decisionale (JSON)
+        </h3>
+        <button id="btn-close-admin" class="text-slate-400 hover:text-white p-2">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+      <div class="p-4 flex-1 overflow-y-auto space-y-3">
+        <p class="text-xs text-slate-400">Puoi modificare la struttura dei passaggi e le opzioni direttamente in formato JSON.</p>
+        <textarea id="json-editor" class="w-full h-80 bg-slate-900 border border-slate-700 rounded-xl p-3 text-xs font-mono text-teal-300 focus:outline-none focus:border-teal-500" spellcheck="false"></textarea>
+        <div id="json-error" class="text-rose-400 text-xs hidden"></div>
+      </div>
+      <div class="p-4 border-t border-slate-700 flex justify-between items-center bg-slate-800/50 rounded-b-2xl">
+        <button id="btn-reset-json" class="text-xs text-slate-400 hover:text-rose-400 transition">Ripristina Default</button>
+        <div class="flex gap-2">
+          <button id="btn-export-json" class="px-3 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-xs font-medium text-white transition">Scarica JSON</button>
+          <button id="btn-save-json" class="px-4 py-1.5 rounded-lg bg-teal-500 hover:bg-teal-400 text-slate-900 font-bold text-xs transition">Salva Cambiamenti</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const DEFAULT_DATA = {
+      startStep: "q1_vector",
+      steps: {
+        "q1_vector": {
+          title: "1. Profilo Biomeccanico: Paziente ORIZZONTALE vs VERTICALE",
+          desc: "Classificazione fondamentale basata sulla vettorialità delle forze masticatorie, tono muscolare e parafunzioni.",
+          infoBox: `
+            <div class="font-semibold text-teal-400 mb-1 border-b border-slate-700 pb-1">
+              <i class="fa-solid fa-circle-info mr-1"></i> Guida alla Definizione del Paziente
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
+              <div>
+                <strong class="text-white block mb-0.5">Paziente ORIZZONTALE:</strong>
+                Sviluppa carichi prevalentemente di taglio e torsione lateralizzata. È tipicamente un digrignatore/bruxista per cause neuromuscolari, articolari o stress. Presenta ipertrofia masseterina e sollecitudini protesiche critiche che richiedono la massima distribuzione del carico.
+              </div>
+              <div>
+                <strong class="text-white block mb-0.5">Paziente VERTICALE:</strong>
+                Sviluppa carichi prevalentemente assiali e compressivi. Presenta assenza o quasi di parafunzioni (paziente fisiologico), consentendo una scelta di materiali più vasta e minori vincoli da torsione laterale.
+              </div>
+            </div>
+          `,
+          options: [
+            {
+              letter: "A",
+              text: "Paziente ORIZZONTALE (Parafunzionale / Digrignatore)",
+              desc: "Carichi di taglio e forze laterali intense. Richiede strategie di ammortizzamento e struttura di massima sicurezza.",
+              nextStep: "q2_cbct"
+            },
+            {
+              letter: "B",
+              text: "Paziente VERTICALE (Fisiologico / Forze Assiali)",
+              desc: "Assenza o trascurabilità di parafunzioni. Forze prevalentemente compressive verticali.",
+              nextStep: "q2_cbct"
+            }
+          ]
+        },
+
+        "q2_cbct": {
+          title: "2. Analisi CBCT: Disponibilità Ossea nei Settori Posteriori",
+          desc: "Valutazione TAC dell'osso disponibile nel mascellare/mandibola posteriore.",
+          options: [
+            {
+              letter: "A",
+              text: "Osso sufficiente (Altezza ≥ 10mm, Spessore ≥ 5mm)",
+              desc: "Consente l'inserimento di impianti assiali standard.",
+              nextStep: "q3_surgery_technique"
+            },
+            {
+              letter: "B",
+              text: "Atrofia severa nei settori posteriori (Seno pneumatizzato / NAI affiorante)",
+              desc: "Necessita di impianti inclinati (All-on-4 / All-on-6 tilted) o rigenerativa ossea.",
+              nextStep: "q3_surgery_technique"
+            },
+            {
+              letter: "C",
+              text: "Atrofia estrema globale (Centrale e Posteriore)",
+              desc: "Scarso volume osseo sia anteriore che posteriore.",
+              nextStep: "SOL_EXTREME"
+            }
+          ]
+        },
+
+        "q3_surgery_technique": {
+          title: "3. Scelta della Tecnica Chirurgica",
+          desc: "Metodologia di posizionamento degli impianti.",
+          options: [
+            {
+              letter: "A",
+              text: "Chirurgia Guidata Statica o Dinamica",
+              desc: "Pianificazione protesicamente guidata per il massimo controllo dell'uscita dei fori.",
+              nextStep: "q4_implant_position"
+            },
+            {
+              letter: "B",
+              text: "Chirurgia Post-Estrattiva Immediata",
+              desc: "Posizionamento impianti contestuale alle estrazioni (gestione dei gap e stabilità primaria).",
+              nextStep: "q4_implant_position"
+            },
+            {
+              letter: "C",
+              text: "Chirurgia Convenzionale a Mano Libera (Siti guariti)",
+              desc: "Inserimento tradizionale su creste riassorbite e già guarite.",
+              nextStep: "q4_implant_position"
+            }
+          ]
+        },
+
+        "q4_implant_position": {
+          title: "4. Posizione Impianti rispetto all'Anatomia Protesica (Laboratorio)",
+          desc: "Relazione tra la posizione dell'emergente impiantare e l'ingombro protesico ideale.",
+          options: [
+            {
+              letter: "A",
+              text: "Impianti CENTRATI con l'Anatomia Protesica",
+              desc: "Gli impianti emergono all'interno del volume protesico ideale senza sbalzi vestibolari.",
+              nextStep: "RESOLVE"
+            },
+            {
+              letter: "B",
+              text: "Anatomie ESPOSTE VESTIBOLARMENTE (Riassorbimento osseo non rigenerato)",
+              desc: "L'osso riassorbito sposta l'impianto in posizione arretrata rispetto all'anatomia protesica ideale.",
+              nextStep: "RESOLVE"
+            }
+          ]
+        }
+      },
+
+      solutions: {
+        "SOL_EXTREME": {
+          title: "Approccio Chirurgico Avanzato per Atrofia Estrema",
+          subtitle: "Impianti Zigomatici / Pterigoidei o Griglie Sottoperiostee (AMS)",
+          surgical: [
+            "Atrofia severa globale che impedisce il posizionamento di impianti intraossei convenzionali.",
+            "Indicata chirurgia avanzata: Impianti Zigomatici o Griglie Sottoperiostee CAD-CAM in Titanio."
+          ],
+          structure: "Barra speciale fresata a supporto esteso.",
+          materials: "Rivestimento ammortizzante in Composito Microibrido o PMMA ad alta resistenza.",
+          notes: [
+            "Necessaria la massima passivazione delle connessioni protesiche."
+          ]
+        }
+      }
+    };
+
+    let appData = JSON.parse(localStorage.getItem('toronto_tree_expert_v2')) || DEFAULT_DATA;
+    let currentStepId = appData.startStep;
+    let userAnswers = {};
+    let stepHistory = [];
+
+    const quizContainer = document.getElementById('quiz-container');
+    const resultContainer = document.getElementById('result-container');
+    const questionTitle = document.getElementById('question-title');
+    const questionDesc = document.getElementById('question-desc');
+    const infoBox = document.getElementById('info-box');
+    const optionsContainer = document.getElementById('options-container');
+    const stepCounter = document.getElementById('step-counter');
+    const breadcrumbs = document.getElementById('breadcrumbs');
+    const btnBack = document.getElementById('btn-back');
+    const btnRestart = document.getElementById('btn-restart');
+    const btnResultRestart = document.getElementById('btn-result-restart');
+    const btnAdmin = document.getElementById('btn-admin');
+    const adminModal = document.getElementById('admin-modal');
+    const btnCloseAdmin = document.getElementById('btn-close-admin');
+    const jsonEditor = document.getElementById('json-editor');
+    const jsonError = document.getElementById('json-error');
+    const btnSaveJson = document.getElementById('btn-save-json');
+    const btnResetJson = document.getElementById('btn-reset-json');
+    const btnExportJson = document.getElementById('btn-export-json');
+
+    function init() {
+      currentStepId = appData.startStep;
+      userAnswers = {};
+      stepHistory = [];
+      quizContainer.classList.remove('hidden');
+      resultContainer.classList.add('hidden');
+      renderStep();
+    }
+
+    function renderStep() {
+      const step = appData.steps[currentStepId];
+      if (!step) return;
+
+      stepCounter.textContent = `Passo ${stepHistory.length + 1}`;
+      renderBreadcrumbs();
+
+      btnBack.classList.toggle('hidden', stepHistory.length === 0);
+
+      questionTitle.textContent = step.title;
+      questionDesc.textContent = step.desc;
+
+      if (step.infoBox) {
+        infoBox.innerHTML = step.infoBox;
+        infoBox.classList.remove('hidden');
+      } else {
+        infoBox.classList.add('hidden');
+      }
+
+      optionsContainer.innerHTML = '';
+      step.options.forEach((opt, idx) => {
+        const btn = document.createElement('button');
+        btn.className = "w-full text-left bg-slate-900/60 hover:bg-slate-700/80 border border-slate-700 hover:border-teal-500/60 p-4 rounded-xl transition-all duration-200 flex items-start space-x-4 group cursor-pointer";
+        btn.innerHTML = `
+          <div class="w-8 h-8 rounded-lg bg-slate-800 group-hover:bg-teal-500 text-slate-300 group-hover:text-slate-900 flex items-center justify-center font-bold text-sm shrink-0 border border-slate-700 group-hover:border-teal-500 transition-colors">
+            ${opt.letter || (idx + 1)}
+          </div>
+          <div class="flex-1">
+            <div class="font-semibold text-white group-hover:text-teal-300 transition-colors text-base">${opt.text}</div>
+            ${opt.desc ? `<div class="text-xs text-slate-400 mt-1 leading-relaxed">${opt.desc}</div>` : ''}
+          </div>
+          <div class="self-center text-slate-500 group-hover:text-teal-400 transition-colors">
+            <i class="fa-solid fa-chevron-right text-sm"></i>
+          </div>
+        `;
+        btn.onclick = () => selectOption(opt);
+        optionsContainer.appendChild(btn);
+      });
+    }
+
+    function renderBreadcrumbs() {
+      breadcrumbs.innerHTML = '';
+      stepHistory.forEach(hStepId => {
+        const hStep = appData.steps[hStepId];
+        const span = document.createElement('span');
+        span.className = "flex items-center gap-1";
+        span.innerHTML = `<span>${hStep.title.split(':')[0]}</span> <i class="fa-solid fa-angle-right text-[10px] text-slate-600"></i>`;
+        breadcrumbs.appendChild(span);
+      });
+      const currSpan = document.createElement('span');
+      currSpan.className = "text-teal-400 font-semibold";
+      currSpan.textContent = appData.steps[currentStepId].title.split(':')[0];
+      breadcrumbs.appendChild(currSpan);
+    }
+
+    function selectOption(option) {
+      userAnswers[currentStepId] = option;
+      stepHistory.push(currentStepId);
+
+      if (option.nextStep === "RESOLVE") {
+        resolveExpertSolution();
+      } else if (appData.solutions[option.nextStep]) {
+        renderSolution(appData.solutions[option.nextStep]);
+      } else if (appData.steps[option.nextStep]) {
+        currentStepId = option.nextStep;
+        renderStep();
+      } else {
+        resolveExpertSolution();
+      }
+    }
+
+    function resolveExpertSolution() {
+      const isOrizzontale = userAnswers["q1_vector"] && userAnswers["q1_vector"].letter === "A";
+      const isCentrato = userAnswers["q4_implant_position"] && userAnswers["q4_implant_position"].letter === "A";
+      const surgeryType = userAnswers["q3_surgery_technique"] ? userAnswers["q3_surgery_technique"].text : "Convenzionale";
+
+      let solution = {
+        title: "",
+        subtitle: "",
+        surgical: [],
+        structure: "",
+        materials: "",
+        notes: []
+      };
+
+      // 1. CHIRURGIA
+      solution.surgical.push(`<strong>Tecnica Chirurgica:</strong> ${surgeryType}.`);
+      if (isOrizzontale) {
+        solution.surgical.push("<strong>Numero Impianti Raccomandati:</strong> <strong>Preferibili 6 Impianti (All-on-6)</strong> per distribuire i carichi di taglio laterali e prevenire sovraccarichi pericrestali.");
+        solution.surgical.push("<strong>Strategia Chirurgica:</strong> Cantilever ridotto al minimo e scelta di impianti a connessione profonda.");
+      } else {
+        solution.surgical.push("<strong>Numero Impianti Raccomandati:</strong> 4 o 6 Impianti (All-on-4 / All-on-6) secondo le distanze anatomiche standard.");
+      }
+
+      // 2. TIPOLOGIA STRUTTURA (LABORATORIO)
+      if (isCentrato) {
+        solution.structure = "<strong>Impianti CENTRATI con l'Anatomia:</strong> Poiché gli impianti emergono correttamente all'interno dell'anatomia protesica, le soluzioni realizzative valide sono: <strong>Barra Semplice</strong>, <strong>Barra Scomposta</strong>, <strong>Barra Thimbles</strong> oppure <strong>Barra Semplice Anatomica</strong>.";
+      } else {
+        solution.structure = "<strong>Anatomie ESPOSTE VESTIBOLARMENTE (Riassorbimento osseo non rigenerato):</strong> Per garantire il supporto strutturale dell'anatomia contro le forze vettoriali durante la vita della protesi, la <strong>scelta primaria da preferire è la BARRA THIMBLES</strong>. Solo secondariamente si può optare per la Struttura Anatomica.";
+      }
+
+      // 3. MATERIALI
+      if (isOrizzontale) {
+        solution.title = "Toronto Bridge per Paziente ORIZZONTALE (Parafunzionale)";
+        solution.subtitle = "Focus su ammortizzamento occlusale, composito microibrido e supporto Thimbles";
+        
+        let matText = "<strong>Materiale di Elezione (Prima Scelta): COMPOSITO MICRO-IBRIDO</strong> su barra, fondamentale per assorbire le sollecitazioni orizzontali ed ammortizzare i picchi di carico.";
+        matText += "<br><br><strong>Vincolo sullo Zirconio:</strong> In questo tipo di paziente, lo zirconio è ammesso <em>SOLO su Barra con Thimbles</em> (per proteggerlo da scheggiature o fratture da torsione).";
+        
+        if (!isCentrato) {
+          matText += "<br><br><strong>Tecnica Realizzativa:</strong> Qualora si scelga la struttura anatomica (secondaria rispetto alla Thimbles), la modalità di realizzazione da preferire è per <strong>ZEPPATURA della parte estetica</strong>.";
+        }
+        solution.materials = matText;
+        solution.notes.push("Obbligatoria la placca di contenzione occlusale (Bite Notturno).");
+        solution.notes.push("Elevata riparabilità della resina/composito direttamente in studio.");
+
+      } else {
+        solution.title = "Toronto Bridge per Paziente VERTICALE (Fisiologico)";
+        solution.subtitle = "Carichi assiali - Scelta flessibile tra Zirconio e Composito Microibrido";
+        
+        let matText = "<strong>Materiale Consigliato: A scelta tra ZIRCONIO e COMPOSITO MICRO-IBRIDO</strong>.";
+        matText += "<br><br><strong>Nota sullo Zirconio:</strong> Nel paziente verticale, grazie all'assenza di forti carichi di taglio, lo Zirconio è pienamente sicuro ed utilizzabile anche su <strong>doppia arcata</strong>.";
+        
+        if (!isCentrato) {
+          matText += "<br><br><strong>In caso di Struttura Anatomica:</strong> Si raccomanda la tecnica per <strong>ZEPPATURA della parte estetica</strong>.";
+        }
+        solution.materials = matText;
+        solution.notes.push("Superficie ad altissima biocompatibilità e lucentezza per la salute dei tessuti gengivali.");
+        solution.notes.push("Eccellente stabilità cromatica nel tempo.");
+      }
+
+      renderSolution(solution);
+    }
+
+    function renderSolution(solution) {
+      quizContainer.classList.add('hidden');
+      resultContainer.classList.remove('hidden');
+
+      document.getElementById('result-title').textContent = solution.title;
+      document.getElementById('result-subtitle').textContent = solution.subtitle;
+
+      const surgList = document.getElementById('result-surgical');
+      surgList.innerHTML = '';
+      solution.surgical.forEach(item => {
+        const li = document.createElement('li');
+        li.className = "flex items-start gap-2";
+        li.innerHTML = `<i class="fa-solid fa-check text-teal-400 mt-1 text-xs"></i> <span>${item}</span>`;
+        surgList.appendChild(li);
+      });
+
+      document.getElementById('result-structure').innerHTML = solution.structure;
+      document.getElementById('result-materials').innerHTML = solution.materials;
+
+      const notesList = document.getElementById('result-notes');
+      notesList.innerHTML = '';
+      solution.notes.forEach(note => {
+        const li = document.createElement('li');
+        li.innerHTML = note;
+        notesList.appendChild(li);
+      });
+
+      const summaryContainer = document.getElementById('result-summary');
+      summaryContainer.innerHTML = '';
+      stepHistory.forEach(sId => {
+        const step = appData.steps[sId];
+        const ans = userAnswers[sId];
+        if (step && ans) {
+          const div = document.createElement('div');
+          div.className = "bg-slate-900/60 p-2.5 rounded-lg border border-slate-700/50";
+          div.innerHTML = `<strong class="text-slate-300 block mb-0.5">${step.title.split(':')[0]}:</strong> <span class="text-teal-400">${ans.text}</span>`;
+          summaryContainer.appendChild(div);
+        }
+      });
+    }
+
+    btnBack.onclick = () => {
+      if (stepHistory.length > 0) {
+        currentStepId = stepHistory.pop();
+        delete userAnswers[currentStepId];
+        renderStep();
+      }
+    };
+
+    btnRestart.onclick = init;
+    btnResultRestart.onclick = init;
+
+    btnAdmin.onclick = () => {
+      jsonEditor.value = JSON.stringify(appData, null, 2);
+      jsonError.classList.add('hidden');
+      adminModal.classList.remove('hidden');
+    };
+
+    btnCloseAdmin.onclick = () => adminModal.classList.add('hidden');
+
+    btnSaveJson.onclick = () => {
+      try {
+        const parsed = JSON.parse(jsonEditor.value);
+        appData = parsed;
+        localStorage.setItem('toronto_tree_expert_v2', JSON.stringify(appData));
+        adminModal.classList.add('hidden');
+        init();
+      } catch (err) {
+        jsonError.textContent = "Errore JSON: " + err.message;
+        jsonError.classList.remove('hidden');
+      }
+    };
+
+    btnResetJson.onclick = () => {
+      if (confirm("Ripristinare le impostazioni predefinite?")) {
+        appData = JSON.parse(JSON.stringify(DEFAULT_DATA));
+        localStorage.removeItem('toronto_tree_expert_v2');
+        jsonEditor.value = JSON.stringify(appData, null, 2);
+        jsonError.classList.add('hidden');
+        init();
+      }
+    };
+
+    btnExportJson.onclick = () => {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", "toronto_tree_expert.json");
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    };
+
+    init();
+  </script>
+</body>
+</html>
